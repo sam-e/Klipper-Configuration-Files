@@ -40,28 +40,31 @@ probe_points:
 #####################################################################
 ##  Connected to MOTOR_0
 ##  Endstop connected to DIAG_0
+
 [stepper_x]
-step_pin: PF13
-dir_pin: PF12
-enable_pin: !PF14
+step_pin: x_step_pin
+dir_pin: x_dir_pin
+enable_pin: !x_enable_pin
 rotation_distance: 40
 microsteps: 32
 full_steps_per_rotation: 400  #set to 400 for 0.9 degree stepper
-endstop_pin: ^PG6
+endstop_pin: ^x_endstop_pin
 position_min: -19
 position_endstop: -19
 position_max: 315
 homing_speed: 50   #Max 100
 homing_retract_dist: 0
 
-[tmc5160 stepper_x] 
-spi_bus: spi1a 
-cs_pin: PC4
-interpolate: false 
+[tmc5160 stepper_x]
+cs_pin: x_comm_pin
+spi_software_mosi_pin: stepper_spi_mosi_pin
+spi_software_miso_pin: stepper_spi_miso_pin
+spi_software_sclk_pin: stepper_spi_sclk_pin
 run_current: 1.0
-sense_resistor: 0.033
-stealthchop_threshold: 0
-
+driver_TBL: 0
+driver_TOFF: 4
+driver_HEND: 0
+driver_HSTRT: 4
 
 ##  Connected to MOTOR_1
 [stepper_x1]
@@ -340,10 +343,8 @@ unretract_extra_length: 0
 unretract_speed: 100
 
 ###########################################
-#########Custom PINs Definition ############
+#########Custom PINs Definition ###########
 ###########################################
-
-
 
 #[output_pin DSLR]
 #pin: rpi:gpio26
@@ -360,12 +361,44 @@ shutdown_value:1
 ### gcode command: SET_PIN PIN=LED value=0 to 1
 
 
+#################################################
+#########Custom Alias PINs Definition ###########
+#################################################
+
+[board_pins octopus_pro_429]
+aliases:
+# stepper_x
+# stepper_x
+  x_step_pin=PF13,   x_dir_pin=PF12,   x_enable_pin=PF14,   x_comm_pin=PC4,   x_diag_pin=PG6,   x_endstop_pin=PG6,
+  y_step_pin=PG0,   y_dir_pin=PG1,   y_enable_pin=PF15,   y_uart_pin=PD11,   y_diag_pin=PG9,   y_endstop_pin=PG9,
+  z0_step_pin=PC13,  z0_dir_pin=PF0,  z0_enable_pin=PF1,  z0_uart_pin=PE4,  z0_diag_pin=null,
+  z1_step_pin=PE2,  z1_dir_pin=PE3,  z1_enable_pin=PD4,  z1_uart_pin=PE1,  z1_diag_pin=null,
+  z2_step_pin=PE6,  z2_dir_pin=PA14,  z2_enable_pin=PE0,  z2_uart_pin=PD3,  z2_diag_pin=null,
+  e_step_pin=PF11,   e_dir_pin=PG3,   e_enable_pin=PG5,   e_uart_pin=PC6,   e_diag_pin=null,   e_heater_pin=PA2,  e_sensor_pin=PF4,
+  stepper_spi_mosi_pin=PA7,  stepper_spi_miso_pin=PA6,  stepper_spi_sclk_pin=PA5,
+
+# accel
+  adxl345_cs_pin=PA15,
+
+# auto leveling
+  bltouch_sensor_pin=PB7,  bltouch_control_pin=PB6,
+  probe_pin=PB7,
+
+# fans
+  fan_part_cooling_pin=PA8,
+  fan_toolhead_cooling_pin=PE5,
+  fan_controller_board_pin=PD12,
+
+# Bed heater
+  heater_bed_heating_pin=PA1,
+  heater_bed_sensor_pin=PF3,
+  
+
+
 
 ################################################################################################
 ################################################################################################
-#####				MACROS					
-
-##################
+#####				MACROS					                                                  ##################
 [gcode_macro RETRACTION_UP]
 gcode:
     {% set CRLEN = printer.firmware_retraction.retract_length|float %}
